@@ -1,3 +1,14 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: jenkins-example-pvc
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 500Gi
+---
 apiVersion: jenkins.io/v1alpha2
 kind: Jenkins
 metadata:
@@ -50,9 +61,33 @@ spec:
         requests:
           cpu: "1"
           memory: 500Mi
+      volumeMounts:
+      - mountPath: /jenkins-home # Jenkins home volume
+        name: jenkins-home
+      - mountPath: /backup # backup volume
+        name: backup
+    volumes:
+    - name: backup # PVC volume where backups will be stored
+      persistentVolumeClaim:
+        claimName: jenkins-example-pvc
   seedJobs:
   - id: jenkins-operator
     targets: "cicd/jobs/*.jenkins"
     description: "Jenkins Operator repository"
     repositoryBranch: master
     repositoryUrl: https://github.com/jenkinsci/kubernetes-operator.git
+  backup:
+    containerName: backup # container name is responsible for backup
+    action:
+      exec:
+        command:
+        - /home/user/bin/backup.sh # this command is invoked on "backup" container to make backup, for example /home/user/bin/backup.sh <backup_number>, <backup_number> is passed by operator
+    interval: 30 # how often make backup in seconds
+    makeBackupBeforePodDeletion: true # make a backup before pod deletion
+  restore:
+    containerName: backup # container name is responsible for restore backup
+    action:
+      exec:
+        command:
+        - /home/user/bin/restore.sh # this command is invoked on "backup" container to make restore backup, for example /home/user/bin/restore.sh <backup_number>, <backup_number> is passed by operator
+    #recoveryOnce: <backup_number> # if want to restore specific backup configure this field and then Jenkins will be restarted and desired backup will be restored
