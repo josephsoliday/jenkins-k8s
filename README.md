@@ -44,10 +44,10 @@ This project shows an example on how to configure Jenkins to run in Kubernetes u
     kubectl get secret jenkins-operator-credentials-example -o 'jsonpath={.data.user}' | base64 -d
     kubectl get secret jenkins-operator-credentials-example -o 'jsonpath={.data.password}' | base64 -d
     ```
-    ### Windows
+    ### Windows Powershell
     ```bash
-    kubectl get secret jenkins-operator-credentials-example -o 'jsonpath={.data.user}' | certutil -decode
-    kubectl get secret jenkins-operator-credentials-example -o 'jsonpath={.data.password}' | certutil -decode
+    kubectl get secret jenkins-operator-credentials-example -o 'jsonpath={.data.user}' > user.txt ; certutil -decode user.txt user_decoded.txt ; cat user_decoded.txt ; del user.txt ; del user_decoded.txt
+    kubectl get secret jenkins-operator-credentials-example -o 'jsonpath={.data.password}' > password.txt ; certutil -decode password.txt password_decoded.txt ; cat password_decoded.txt ; del password.txt ; del password_decoded.txt
     ```
 
 4. Connect to the Jenkins instance (actual Kubernetes cluster):
@@ -57,4 +57,4 @@ This project shows an example on how to configure Jenkins to run in Kubernetes u
 
 5. Then open browser with address http://localhost:8080.
 
-NOTE: Please see the [Kuberntes Operator Deploy Jenkins](https://jenkinsci.github.io/kubernetes-operator/docs/getting-started/latest/deploy-jenkins/) for more information.
+**NOTE:** Please see the [Kuberntes Operator Deploy Jenkins](https://jenkinsci.github.io/kubernetes-operator/docs/getting-started/latest/deploy-jenkins/) for more information.
